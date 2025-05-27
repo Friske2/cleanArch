@@ -1,5 +1,7 @@
 using cleanArch.Application.Interfaces;
 using cleanArch.Infrastructure.Services;
+using Microsoft.AspNetCore.Mvc;
+using cleanArch.Application.Common;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,6 +12,12 @@ builder.Services.AddSwaggerGen();
 
 // Register services
 builder.Services.AddSingleton<IProductService, ProductService>();
+
+// config handle errors 
+builder.Services.Configure<ApiBehaviorOptions>(options =>
+{
+    options.InvalidModelStateResponseFactory = CustomInvalidModelStateResponse.ProduceErrorResponse;
+});
 
 var app = builder.Build();
 
@@ -27,6 +35,10 @@ app.MapControllers();
 // set auto redirect to swagger
 app.MapGet("/", () => Results.Redirect("/swagger/index.html"))
     .ExcludeFromDescription(); // Exclude from Swagger documentation
+
+// Add middleware for handling exceptions
+app.UseMiddleware<cleanArch.Application.Middleware.ExceptionHandlingMiddleware>();
+
 app.Run();
 
 record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)

@@ -12,7 +12,7 @@ This repository provides a clean architecture template for .NET projects, enabli
 
 ## Getting Started
 
-# Add template
+## Add template
 
 ```bash
 git clone https://github.com/Friske2/cleanArch.git

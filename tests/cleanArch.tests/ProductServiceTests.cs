@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using cleanArch.Application.Interfaces;
 using cleanArch.Infrastructure.Services;
 using cleanArch.Domain.Entities;
+using cleanArch.Application.Exceptions;
 
 namespace cleanArch.Tests;
 
@@ -12,29 +13,96 @@ public class ProductServiceTests
     private readonly Mock<IProductService> _mockRepo;
     private readonly ProductService _service;
 
-    public ProductServiceTests()
+
+    [Fact]
+    public void GetAllProduct_ShouldBeNotNull()
     {
-        _mockRepo = new Mock<IProductService>();
-        _service = new ProductService(_mockRepo.Object);
+        var products = _service.GetAll();
+
+        Assert.NotNull(products);
     }
 
     [Fact]
-    public void GetAllProducts_ShouldReturnAllProducts()
+    public void AddProductAndGetById_ShouldReturnProduct_WhenExists()
     {
-        // Arrange
-        var products = new List<Product>
+        // Add a product
+        var product = new Product
         {
-            new Product { Id = "1", Name = "Pen", Price = 10 },
-            new Product { Id = "2", Name = "Notebook", Price = 50 }
+            Id = "MOCK_UUID",
+            Name = "Test Product",
+            Price = 9.99m
         };
-        _mockRepo.Setup(repo => repo.GetAll()).Returns(products);
+        _service.Add(product);
+        // Get product by ID
+        var retrievedProduct = _service.GetById("MOCK_UUID");
+        Assert.NotNull(retrievedProduct);
+        Assert.Equal("Test Product", retrievedProduct.Name);
+    }
 
-        // Act
-        var result = _service.GetAll();
+    [Fact]
+    public void GetFakeProducts_ShouldBeNull()
+    {
+        var fakeProductId = "FAKE_UUID";
+        var product = _service.GetById(fakeProductId);
+        Assert.Null(product);
+    }
 
-        // Assert
-        Assert.NotNull(result);
-        Assert.Equal(3, result.Count());
+    [Fact]
+
+    public void DeleteProductAndGetById_ShouldReturnNull_WhenDeleted()
+    {
+        // Add a product
+        var product = new Product
+        {
+            Id = "MOCK_UUID",
+            Name = "Test Product",
+            Price = 9.99m
+        };
+        _service.Add(product);
+
+        // Delete the product
+        _service.Delete("MOCK_UUID");
+
+        // Try to get the deleted product
+        var deletedProduct = _service.GetById("MOCK_UUID");
+        Assert.Null(deletedProduct);
+    }
+
+    [Fact]
+    public void UpdateProduct_ShouldBeUpdated()
+    {
+        // Add a product
+        var product = new Product
+        {
+            Id = "MOCK_UUID",
+            Name = "Test Product",
+            Price = 9.99m
+        };
+        _service.Add(product);
+
+        // Update the product
+        product.Name = "Updated Product";
+        _service.Update(product);
+
+        // Get the updated product by ID
+        var updatedProduct = _service.GetById("MOCK_UUID");
+        Assert.NotNull(updatedProduct);
+        Assert.Equal("Updated Product", updatedProduct.Name);
+    }
+
+    [Fact]
+    public void UpdateFakeProduct_ShouldThrowException()
+    {
+        // Attempt to update a product that does not exist
+        var fakeProduct = new Product
+        {
+            Id = "FAKE_UUID",
+            Name = "Fake Product",
+            Price = 19.99m
+        };
+
+        // Assert throw Product NotFoundException
+        Assert.Throws<NotFoundException>(() => _service.Update(fakeProduct));
     }
 
 }

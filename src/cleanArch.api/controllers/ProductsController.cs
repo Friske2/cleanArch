@@ -2,7 +2,9 @@ using Microsoft.AspNetCore.Mvc;
 using cleanArch.Application.Interfaces;
 using cleanArch.Domain.Entities;
 using cleanArch.Api.Contracts.Requests;
-
+using cleanArch.Application.Exceptions;
+using cleanArch.Application.Wrappers;
+using cleanArch.api.contracts.requests;
 namespace cleanArch.Api.Controllers;
 
 [ApiController]
@@ -25,7 +27,7 @@ public class ProductsController : ControllerBase
         var product = _productService.GetById(id);
         if (product == null)
         {
-            return NotFound();
+            throw new NotFoundException($"Product with ID {id} not found.");
         }
         return Ok(product);
     }
@@ -33,42 +35,44 @@ public class ProductsController : ControllerBase
     [HttpPost]
     public IActionResult Add([FromBody] CreateProductRequest product)
     {
-        try
+        // validate the product data
+        if (product.Name == null || product.Price <= 0)
         {
-            // validate the product data
-            if (product.Name == null || product.Price <= 0)
-            {
-                // set status code to 400 Bad Request
-                return StatusCode(400, new
-                {
-                    Status = "Error",
-                    Message = "Invalid product data. Name cannot be null and Price must be greater than zero."
-                });
-            }
-
-            // create a new product instance
-            var payload = new Product
-            {
-                Id = Guid.NewGuid().ToString(),
-                Name = product.Name,
-                Price = product.Price
-            };
-
-            _productService.Add(payload);
-            return CreatedAtAction(nameof(GetById), new { id = payload.Id }, payload);
+            // set status code to 400 Bad Request
+            throw new BadRequestException("Invalid product data. Name cannot be null and Price must be greater than zero.");
         }
-        catch (Exception ex)
+
+        // create a new product instance
+        var payload = new Product
         {
-            // response error json format
-            var errorResponse = new
-            {
-                Status = "Error",
-                Message = $"An error occurred while creating the product: {ex.Message}"
-            };
+            Id = Guid.NewGuid().ToString(),
+            Name = product.Name,
+            Price = product.Price
+        };
 
-            // Log the exception
-            // return json error response 
-            return StatusCode(500, errorResponse);
+        _productService.Add(payload);
+        var response = new SuccessResponse<string>(payload.Id, "Product created successfully", 201);
+        return StatusCode(201, response);
+    }
+
+    [HttpPut("{id}")]
+    public IActionResult Update(string id, [FromBody] UpdateProductRequest product)
+    {
+        // validate the product data
+        if (product.Name == null || product.Price <= 0)
+        {
+            // set status code to 400 Bad Request
+            throw new BadRequestException("Invalid product data. Name cannot be null and Price must be greater than zero.");
         }
+
+        var payload = new Product
+        {
+            Id = id,
+            Name = product.Name,
+            Price = product.Price
+        };
+
+        _productService.Update(payload);
+        return Ok(new SuccessResponse<string>(id, "Product updated successfully"));
     }
 }

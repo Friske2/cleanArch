@@ -1,63 +1,26 @@
-# Clean Architecture Solution Setup
+# Clean Architecture Template for .NET
 
-## Project Structure
+This repository provides a clean architecture template for .NET projects, enabling you to quickly set up a well-structured solution following clean architecture principles.
 
-### API Layer
+## Features
 
-```bash
-dotnet new webapi -n cleanArch.Api -o src/cleanArch.Api
-```
+- Layered architecture with clear separation of concerns
+- Domain-driven design approach
+- Built-in dependency injection
+- Ready-to-use project structure
+- Basic configuration setup
 
-### Application Layer
+## Getting Started
 
-```bash
-dotnet new classlib -n cleanArch.Application -o src/cleanArch.Application
-```
-
-### Domain Layer
+# Add template
 
 ```bash
-dotnet new classlib -n cleanArch.Domain -o src/cleanArch.Domain
-```
+git clone https://github.com/Friske2/cleanArch.git
+cd cleanArch
 
-### Infrastructure Layer
+#install local template
+dotnet new -i .
 
-```bash
-dotnet new classlib -n cleanArch.Infrastructure -o src/cleanArch.Infrastructure
-```
-
-## Project References
-
-### API References
-
-```bash
-dotnet add src/cleanArch.Api/cleanArch.Api.csproj reference src/cleanArch.Application/cleanArch.Application.csproj
-dotnet add src/cleanArch.Api/cleanArch.Api.csproj reference src/cleanArch.Infrastructure/cleanArch.Infrastructure.csproj
-```
-
-### Application References
-
-```bash
-dotnet add src/cleanArch.Application/cleanArch.Application.csproj reference src/cleanArch.Domain/cleanArch.Domain.csproj
-```
-
-### Infrastructure References
-
-```bash
-dotnet add src/cleanArch.Infrastructure/cleanArch.Infrastructure.csproj reference src/cleanArch.Application/cleanArch.Application.csproj
-dotnet add src/cleanArch.Infrastructure/cleanArch.Infrastructure.csproj reference src/cleanArch.Domain/cleanArch.Domain.csproj
-```
-
-## Test Setup
-
-```bash
-dotnet new xunit -o tests/cleanArch.Tests
-
-# Add project references
-dotnet add tests/cleanArch.Tests/cleanArch.Tests.csproj reference src/cleanArch.Application/cleanArch.Application.csproj
-dotnet add tests/cleanArch.Tests/cleanArch.Tests.csproj reference src/cleanArch.Domain/cleanArch.Domain.csproj
-dotnet add tests/cleanArch.Tests/cleanArch.Tests.csproj reference src/cleanArch.Infrastructure/cleanArch.Infrastructure.csproj
-
-# Add testing packages
-dotnet add tests/cleanArch.Tests/cleanArch.Tests.csproj package Moq
+#create project
+dotnet new cleanarch -n MyProject
 ```
